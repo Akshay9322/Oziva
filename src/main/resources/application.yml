@@ -1,0 +1,18 @@
+spring:
+   datasource:
+      url: jdbc:postgresql://localhost:5432/Oziva
+      username: postgres
+      password: Sangita@1971
+      
+   jpa: 
+     hibernate: 
+        ddl-auto: update  # Options: none, update, create, create-drop
+     properties:
+      hibernate:
+        show_sql: true  # Optional: to print SQL queries to the console
+        format_sql: true # Optional: to format SQL queries for better readability
+        sql:
+          init:
+            mode: always # Optional: to ensure schema initialization scripts are run  
+   application:
+    name: Oziva
