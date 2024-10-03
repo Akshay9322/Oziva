@@ -84,35 +84,62 @@ public class CustomerService {
 	 Map<Long, OnlyCustomerResponseDTO> customerOrder = new HashMap<>();
 	 //map will store customerId and there customer object
 	 
-	 for(Object[] row : rows) {
-		 long customerId = (long) row[0];
-		 String custmerName = (String) row[1];
+	 rows.stream().forEach((rec) ->{
+		 long customerId = (long) rec[0];
+		 String custmerName = (String) rec[1];
+		 long orderId = (long) rec[2];
+		 String productName = (String) rec[3];
 		 
-		 long orderId = (long) row[2];
-		 String productName = (String) row[3];
-		 
-		 
-		 
-		OnlyCustomerResponseDTO onlyCustomerResponseDTO = customerOrder.get(customerId);
-		 
-		// logger.debug(onlyCustomerResponseDTO.getListOfOrder().get(3).getProductName());
+		 OnlyCustomerResponseDTO onlyCustomerResponseDTO = customerOrder.get(customerId);
 		 
 		 if(onlyCustomerResponseDTO == null) {
-			 onlyCustomerResponseDTO = new OnlyCustomerResponseDTO();
-			 System.out.println("Valoue of object After: "+onlyCustomerResponseDTO);
-			 onlyCustomerResponseDTO.setId(customerId);
-			 onlyCustomerResponseDTO.setName(custmerName);
-			 onlyCustomerResponseDTO.setListOfOrder(new ArrayList<>());
-			 customerOrder.put(customerId, onlyCustomerResponseDTO);
+			  onlyCustomerResponseDTO = new OnlyCustomerResponseDTO();
+              onlyCustomerResponseDTO.setId(customerId);
+              onlyCustomerResponseDTO.setName(custmerName);
+              onlyCustomerResponseDTO.setListOfOrder(new ArrayList<>());
+              customerOrder.put(onlyCustomerResponseDTO.getId(), onlyCustomerResponseDTO);
 		 }
 		 
 		 OnlyOrderResponseDTO onlyOrderResponseDTO = new OnlyOrderResponseDTO();
-		 
 		 onlyOrderResponseDTO.setId(orderId);
 		 onlyOrderResponseDTO.setProductName(productName);
-		 
 		 onlyCustomerResponseDTO.getListOfOrder().add(onlyOrderResponseDTO);
-	 }
+		 
+	 });
+	 
+	 
+	 
+//	 for(Object[] row : rows) {
+//		 long customerId = (long) row[0];
+//		 String custmerName = (String) row[1];
+//		 
+//		 long orderId = (long) row[2];
+//		 String productName = (String) row[3];
+//		 
+//		 
+//		 
+//		OnlyCustomerResponseDTO onlyCustomerResponseDTO = customerOrder.get(customerId);
+//		
+//		
+//		 
+//		// logger.debug(onlyCustomerResponseDTO.getListOfOrder().get(3).getProductName());
+//		 
+//		 if(onlyCustomerResponseDTO == null) {
+//			 onlyCustomerResponseDTO = new OnlyCustomerResponseDTO();
+//			 System.out.println("Valoue of object After: "+onlyCustomerResponseDTO);
+//			 onlyCustomerResponseDTO.setId(customerId);
+//			 onlyCustomerResponseDTO.setName(custmerName);
+//			 onlyCustomerResponseDTO.setListOfOrder(new ArrayList<>());
+//			 customerOrder.put(customerId, onlyCustomerResponseDTO);
+//		 }
+//		 
+//		 OnlyOrderResponseDTO onlyOrderResponseDTO = new OnlyOrderResponseDTO();
+//		 
+//		 onlyOrderResponseDTO.setId(orderId);
+//		 onlyOrderResponseDTO.setProductName(productName);
+//		 
+//		 onlyCustomerResponseDTO.getListOfOrder().add(onlyOrderResponseDTO);
+//	 }
 	 
     
 	return new ArrayList<>(customerOrder.values());
@@ -122,42 +149,65 @@ public class CustomerService {
 		List<Object[]> rows;
 		try {
 		 rows = customerRepo.findBycustomerMobileNo(mobileNo);
+		 if(rows.isEmpty()) {
+			 throw new CustomerNotFoundException("No cutomer found");
+		}
 		}catch(DataAccessException  ex){
 			logger.error("Database failed to fetch data", ex);
 			throw new RuntimeException("Database failed to fetch data",ex);
 		}
 		
-		if(rows.isEmpty()) {
-			 throw new CustomerNotFoundException("No cutomer found");
-		}
-		
-		
-		
-		Object[] firstRow = rows.get(0);
-		
-		long customerId = (long) firstRow[0];
-		String customername = (String) firstRow[1];
-		
 		OnlyCustomerResponseDTO onlyCustomerResponseDTO  = new OnlyCustomerResponseDTO();
+//		Object[] firstRow = rows.get(0);
+//		
+//		long customerId = (long) firstRow[0];
+//		String customername = (String) firstRow[1];
+//		
+//		
+//		
+//		onlyCustomerResponseDTO.setId(customerId);
+//		onlyCustomerResponseDTO.setName(customername);
+//		onlyCustomerResponseDTO.setListOfOrder(new ArrayList<>());
+//		
+//		
+//		
+//		for(Object[] row : rows) {
+//			long orderId = (long) row[2];
+//			String productName = (String) row[3];
+//			
+//			OnlyOrderResponseDTO onlyOrderResponseDTO = new OnlyOrderResponseDTO();
+//			onlyOrderResponseDTO.setId(orderId);
+//			onlyOrderResponseDTO.setProductName(productName);
+//			
+//			onlyCustomerResponseDTO.getListOfOrder().add(onlyOrderResponseDTO);
+//		
+//			
+//		}
+		/* Will have list of row 
+		 * will apply stream on that
+		 * create onlyCustomerResponseDTO
+		 * use map() will check object is null if yes set value 
+		 * after that only going to set order value*/
 		
-		onlyCustomerResponseDTO.setId(customerId);
-		onlyCustomerResponseDTO.setName(customername);
-		onlyCustomerResponseDTO.setListOfOrder(new ArrayList<>());
-		
-		
-		
-		for(Object[] row : rows) {
-			long orderId = (long) row[2];
-			String productName = (String) row[3];
+		 rows.stream().forEach((ele) -> {
+			   
+			if(onlyCustomerResponseDTO.getName() == null) {
+				long custId = (long) ele[0];
+				String custName = (String)ele[1];
+				onlyCustomerResponseDTO.setId(custId);
+				onlyCustomerResponseDTO.setName(custName);
+				onlyCustomerResponseDTO.setListOfOrder(new ArrayList<>());
+			}
 			
 			OnlyOrderResponseDTO onlyOrderResponseDTO = new OnlyOrderResponseDTO();
-			onlyOrderResponseDTO.setId(orderId);
-			onlyOrderResponseDTO.setProductName(productName);
+			long ordId = (long) ele[2];
+			String proName = (String) ele[3];
+			onlyOrderResponseDTO.setId(ordId);
+			onlyOrderResponseDTO.setProductName(proName);
 			
 			onlyCustomerResponseDTO.getListOfOrder().add(onlyOrderResponseDTO);
-		
 			
-		}
+		});
 		
 		return onlyCustomerResponseDTO;
 	}
