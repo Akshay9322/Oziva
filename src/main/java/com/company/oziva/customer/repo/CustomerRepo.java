@@ -25,5 +25,5 @@ public interface CustomerRepo extends JpaRepository<Customer, Long> {
             "INNER JOIN orders o ON c.customer_mobile_no = o.mobile_no " +
             "WHERE c.customer_mobile_no = :customerMobileNo", 
     nativeQuery = true)
-	List<Object[]> findBycustomerMobileNo(@Param("customerMobileNo") String customerMobileNo);
+	Optional<List<Object[]>> findBycustomerMobileNo(@Param("customerMobileNo") String customerMobileNo);
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,12 +80,12 @@ public class CustomerService {
 	public  List<OnlyCustomerResponseDTO> getcustomerAndOrder(String customerMobileNo) {
 		
 	           
-	 List<Object[]> rows = customerRepo.findBycustomerMobileNo(customerMobileNo);
+	 Optional<List<Object[]>> rows = customerRepo.findBycustomerMobileNo(customerMobileNo);
 	 
 	 Map<Long, OnlyCustomerResponseDTO> customerOrder = new HashMap<>();
 	 //map will store customerId and there customer object
 	 
-	 rows.stream().forEach((rec) ->{
+	 rows.get().stream().forEach((rec) ->{
 		 long customerId = (long) rec[0];
 		 String custmerName = (String) rec[1];
 		 long orderId = (long) rec[2];
@@ -146,16 +147,28 @@ public class CustomerService {
 	}
 	
 	public OnlyCustomerResponseDTO fetchSingleCustomer(String mobileNo) {
-		List<Object[]> rows;
+		Optional<List<Object[]>> optionalRows;
+		
 		try {
-		 rows = customerRepo.findBycustomerMobileNo(mobileNo);
-		 if(rows.isEmpty()) {
-			 throw new CustomerNotFoundException("No cutomer found");
+		optionalRows = customerRepo.findBycustomerMobileNo(mobileNo);
+		if(optionalRows.isPresent() && optionalRows.get().isEmpty()) {
+			throw new CustomerNotFoundException("No cutomer found with mbile no: "+mobileNo);
 		}
 		}catch(DataAccessException  ex){
 			logger.error("Database failed to fetch data", ex);
 			throw new RuntimeException("Database failed to fetch data",ex);
 		}
+		
+//		try {
+//		 rows = customerRepo.findBycustomerMobileNo(mobileNo);
+//		 System.out.println("Size of row: "+rows.get().size());
+//		 if(rows.isEmpty()) {
+//			 throw new CustomerNotFoundException("No cutomer found");
+//		}
+//		}catch(DataAccessException  ex){
+//			logger.error("Database failed to fetch data", ex);
+//			throw new RuntimeException("Database failed to fetch data",ex);
+//		}
 		
 		OnlyCustomerResponseDTO onlyCustomerResponseDTO  = new OnlyCustomerResponseDTO();
 //		Object[] firstRow = rows.get(0);
@@ -189,7 +202,7 @@ public class CustomerService {
 		 * use map() will check object is null if yes set value 
 		 * after that only going to set order value*/
 		
-		 rows.stream().forEach((ele) -> {
+		optionalRows.get().stream().forEach((ele) -> {
 			   
 			if(onlyCustomerResponseDTO.getName() == null) {
 				long custId = (long) ele[0];
