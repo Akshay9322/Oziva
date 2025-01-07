@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin-deployment
+  namespace: database
+  labels:
+    app: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:latest
+          ports:
+            - containerPort: 80 # pgAdmin runs on port 80 by default
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: akshay@gmail.com # Replace with your desired email
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: password
+          volumeMounts:
+            - name: pgadmin-data
+              mountPath: /var/lib/pgadmin
+      volumes:
+        - name: pgadmin-data
+          emptyDir: {} # For testing; consider PVC for production
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin-service
+  namespace: database
+spec:
+  type: ClusterIP # Change to LoadBalancer if running in a cloud environment
+  ports:
+    - port: 80 # service port
+      targetPort: 80 # container port
+      #nodePort: 30002 # Accessible on this port via the Node IP
+  selector:
+    app: pgadmin

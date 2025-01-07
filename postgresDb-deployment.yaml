@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16.4
+          ports:
+            - containerPort: 5432 
+          env:
+            - name: POSTGRES_DB
+              value: Oziva
+            - name: POSTGRES_USER
+              valueFrom: 
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: password
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql/data"
+              name: oziva-pgdata
+      volumes:
+        - hostPath:
+            path: "/home/docker/pgdata"
+          name: oziva-pgdata 
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: database
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432       # Port that the service exposes
+      targetPort: 5432 # Port on the container
+  type: ClusterIP      # Default type; change to NodePort or LoadBalancer if needed

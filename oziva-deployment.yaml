@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oziva
+  namespace: oziva-namespace
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oziva
+  template:
+    metadata:
+      labels:
+        app: oziva
+    spec:
+      containers:
+        - name: oziva-container
+          image: oziva-app-v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom: 
+                secretKeyRef: 
+                  name: oziva-secrets
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: oziva-secrets
+                  key: password
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef: 
+                  name: config-map
+                  key: database-url
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: oziva-service
+  namespace: oziva-namespace
+  labels:
+    app: oziva
+spec:
+  selector:
+    app: oziva
+  ports:
+    - protocol: TCP
+      port: 8081   # service exposed to this port
+      targetPort: 8080 # conatiner port
+    #  nodePort: 30006 # port for exterenal IP address (Port you need to put into browser or postman)
+  type: ClusterIP    

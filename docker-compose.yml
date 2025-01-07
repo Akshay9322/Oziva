@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.txt
+    container_name: oziva-app
+    ports:
+      - "8080:8080"
+    networks:
+      - oziva-network  # Attach to the oziva-network
+    depends_on:
+      - db  # Ensure db service is started before the app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/Oziva  # Reference db service by name 'db'
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Sangita@1971
+
+  db:
+    image: postgres:16.4
+    container_name: oziva-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Sangita@1971
+      POSTGRES_DB: Oziva
+    ports:
+      - "5000:5432"
+    networks:
+      - oziva-network  # Attach to the oziva-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: oziva-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "7000:80"
+    networks:
+      - oziva-network  # Attach to the oziva-network
+
+# Define the custom network 'oziva-network'
+networks:
+  oziva-network:
+    driver: bridge  # Use the default 'bridge' network driver

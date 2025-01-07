@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map
+  namespace: oziva-namespace
+data:
+  database-url: jdbc:postgresql://postgres-service.database:5432/Oziva

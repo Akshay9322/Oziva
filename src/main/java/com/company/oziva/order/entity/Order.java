@@ -2,7 +2,7 @@ package com.company.oziva.order.entity;
 
 import java.sql.Date;
 
-import org.springframework.stereotype.Component;
+
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Component
+
 @Entity
 @Table(name = "orders")
 @Data

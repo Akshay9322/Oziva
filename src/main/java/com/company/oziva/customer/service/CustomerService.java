@@ -1,7 +1,7 @@
 package com.company.oziva.customer.service;
 
 
-import java.sql.SQLException;
+
 //import java.lang.System.Logger;
 import java.util.ArrayList;
 
@@ -15,12 +15,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.company.oziva.customer.entity.Address;
 import com.company.oziva.customer.entity.Customer;
+import com.company.oziva.customer.entity.UsernameAndPassword;
 import com.company.oziva.customer.exception.CustomerNotFoundException;
 import com.company.oziva.customer.repo.CustomerRepo;
+import com.company.oziva.customer.repo.UsernameAndPasswordRepo;
 import com.company.oziva.customer.request.dto.CustomerDto;
 import com.company.oziva.customer.response.dto.OnlyCustomerResponseDTO;
 import com.company.oziva.customer.response.dto.OnlyOrderResponseDTO;
@@ -31,6 +35,16 @@ public class CustomerService {
 	
 	@Autowired
 	private CustomerRepo customerRepo;
+	
+	@Autowired
+	private UsernameAndPasswordRepo usenAndPasswordRepo;
+	
+	private final PasswordEncoder passwordEncoder;
+	
+    public CustomerService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = new BCryptPasswordEncoder();
+    }
+	 
 	
 	
 	public static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
@@ -47,6 +61,29 @@ public class CustomerService {
 //	public CustomerService(Address address) {
 //		this.address = address;
 //	}
+	
+	
+	public String registration(UsernameAndPassword usernameAndPassword) {
+		
+		String encodedPassword = passwordEncoder.encode(usernameAndPassword.getPassword());
+		
+		usernameAndPassword.setPassword(encodedPassword);
+		
+		UsernameAndPassword userandPass = usenAndPasswordRepo.save(usernameAndPassword);
+		
+		if(userandPass == null) {
+			return "User not registerd";
+		}
+		
+		return "User registerd susccesfully";
+		
+	}
+	
+	public boolean exitByUserName(String username) {
+		return usenAndPasswordRepo.existsById(username);
+
+	}
+	
 	public CustomerDto saveCustomer(CustomerDto customerDto) {
 		Customer customer = new Customer();
 		customer.setCustomerName(customerDto.getCustomerName());
@@ -213,12 +250,14 @@ public class CustomerService {
 			}
 			
 			OnlyOrderResponseDTO onlyOrderResponseDTO = new OnlyOrderResponseDTO();
+			if(ele[2] != null && ele[3] != null) {
 			long ordId = (long) ele[2];
 			String proName = (String) ele[3];
 			onlyOrderResponseDTO.setId(ordId);
 			onlyOrderResponseDTO.setProductName(proName);
 			
 			onlyCustomerResponseDTO.getListOfOrder().add(onlyOrderResponseDTO);
+			}
 			
 		});
 		

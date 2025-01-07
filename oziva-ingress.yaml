@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  namespace: oziva-namespace
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: oziva.com
+    http:
+      paths:
+      - path: /customer
+        pathType: Prefix
+        backend:
+          service:
+            name: oziva-service
+            port:
+              number: 8081
+

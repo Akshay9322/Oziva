@@ -22,7 +22,7 @@ public interface CustomerRepo extends JpaRepository<Customer, Long> {
 	
 	@Query(value = "SELECT c.id, c.customer_name, o.order_id, o.product_name " +
             "FROM customer c " +
-            "INNER JOIN orders o ON c.customer_mobile_no = o.mobile_no " +
+            "LEFT JOIN orders o ON c.customer_mobile_no = o.mobile_no " +
             "WHERE c.customer_mobile_no = :customerMobileNo", 
     nativeQuery = true)
 	Optional<List<Object[]>> findBycustomerMobileNo(@Param("customerMobileNo") String customerMobileNo);
